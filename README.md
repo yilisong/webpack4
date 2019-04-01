@@ -11,6 +11,10 @@
   * [1.5 创建测试文件](#15-创建测试文件)
   * [1.6 初版测试](#16-初版测试)
   * [1.7 初涉配置文件](#17-初涉配置文件)
+* [2 常规配置](#2-常规配置)
+  * [2.1 js打包](#21-安装前提)
+  * [2.2 html打包](#22-html打包)
+  * [2.3 css图片处理](#23-css图片处理) 
 
 ## 1 安装
 
@@ -95,4 +99,63 @@
       "build": "webpack  --mode production --config=config/webpack.dev.js"
     },
     ...
+```
+
+## 1 常规配置
+
+### 2.1 js打包
+```javascript
+在webpack.dev.js中引入
+  ⚠️ ‘uglifyjs-webpack-plugin’ 该插件webpack已经集成了，一般不需要安装，如果出现缺少该文件错误，单独安装下试试
+    安装命令 ‘npm install uglifyjs-webpack-plugin --save’
+  const uglify = require('uglifyjs-webpack-plugin');
+
+  ...
+  plugins: [
+    new uglify() // js压缩
+  ],
+  ...
+       npm  v6.2.0
+```
+
+### 2.2 html打包
+```javascript
+ 安装‘html-webpack-plugin’插件  命令:'npm install html-webpack-plugin --save-dev'
+在webpack.dev.js中引入
+  const htmlPlugin = require('html-webpack-plugin')
+
+  ...
+  plugins: [
+    ...
+    new htmlPlugin({
+      minify: { //是对html文件进行压缩
+        removeAttributeQuotes:true  //removeAttrubuteQuotes是却掉属性的双引号。
+      },
+      hash: true, //为了开发中js有缓存效果，所以加入hash，这样可以有效避免缓存JS。
+      template: './src/index.html' //是要打包的html模版路径和文件名称。
+    }),
+    ...
+  ],
+  ...
+```
+
+### 2.3 css图片处理打包
+```javascript
+安装图片引用路径插件 'npm install --save-dev file-loader url-loader'
+file-loader：解决引用路径的问题，拿background样式用url引入背景图来说，我们都知道，webpack最终会将各个模块打包成一个文件，因此我们样式中的url路径是相对入口html页面的，而不是相对于原始css文件所在的路径的。这就会导致图片引入失败。这个问题是用file-loader解决的，file-loader可以解析项目中的url引入（不仅限于css），根据我们的配置，将图片拷贝到相应的路径，再根据我们的配置，修改打包后文件引用路径，使之指向正确的文件。
+url-loader：如果图片较多，会发很多http请求，会降低页面性能。这个问题可以通过url-loader解决。url-loader会将引入的图片编码，生成dataURl。相当于把图片数据翻译成一串字符。再把这串字符打包到文件中，最终只需要引入这个文件就能访问图片了。当然，如果图片较大，编码会消耗性能。因此url-loader提供了一个limit参数，小于limit字节的文件会被转为DataURl，大于limit的还会使用file-loader进行copy。
+  在webpack.dev.js内配置
+  module: {
+    rules: [
+      ...
+      {
+        test:/\.(png|jpg|gif|jpeg)/,  //是匹配图片文件后缀名称
+        use:[{
+            loader:'url-loader', //是指定使用的loader和loader的配置参数
+            options:{
+                limit:500  //是把小于500B的文件打成Base64的格式，写入JS
+            }
+        }]
+      }
+      ...
 ```

@@ -1,4 +1,6 @@
 const path = require('path')
+const uglify = require('uglifyjs-webpack-plugin') // js压缩 
+const htmlPlugin = require('html-webpack-plugin') // html打包
 module.exports = {
   module: 'development',
   /**
@@ -31,6 +33,15 @@ module.exports = {
           { loader: 'style-loader' },
           { loader: 'css-loader' }
         ]
+      },
+      {
+        test:/\.(png|jpg|gif|jpeg)/,  //是匹配图片文件后缀名称
+        use:[{
+            loader:'url-loader', //是指定使用的loader和loader的配置参数
+            options:{
+                limit:500  //是把小于500B的文件打成Base64的格式，写入JS
+            }
+        }]
       }
       // {
       //   test: /\.vue$/,
@@ -69,7 +80,16 @@ module.exports = {
     ]
   },
   // 插件，用于生产模板和各项功能
-  plugins: [],
+  plugins: [
+    new uglify(), // js压缩
+    new htmlPlugin({
+      minify: { //是对html文件进行压缩
+        removeAttributeQuotes:true  //removeAttrubuteQuotes是却掉属性的双引号。
+      },
+      hash: true, //为了开发中js有缓存效果，所以加入hash，这样可以有效避免缓存JS。
+      template: './src/index.html' //是要打包的html模版路径和文件名称。
+    })
+  ],
   // 配置webpack开发服务功能
   devServer: {
     // 设置基本目录结构
