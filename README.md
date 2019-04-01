@@ -1,4 +1,4 @@
-<h1 style="text-align: center;">webpack 4  0~1</h1>
+<h1 style="text-align: center;">webpack 4</h1>
 
 
 <h2>以下操作默认相关环境以及安装好</h2>
