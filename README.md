@@ -14,7 +14,13 @@
 * [2 常规配置](#2-常规配置)
   * [2.1 js打包](#21-js打包)
   * [2.2 html打包](#22-html打包)
-  * [2.3 css图片处理](#23-css图片处理) 
+  * [2.3 css图片处理](#23-css图片处理)
+  * [2.4 css分离和图片路径处理](#24-css分离和图片路径处理)
+  * [2.5 HTML中图片处理](#25-HTML中图片处理)
+  * [2.6 Less文件的打包和分离](#26-Less文件的打包和分离)
+  * [2.7 SASS文件的打包和分离](#27-SASS文件的打包和分离)
+  * [2.8 CSS3属性前缀](#28-CSS3属性前缀)
+  
 
 ## 1 安装
 
@@ -163,4 +169,146 @@ url-loader：如果图片较多，会发很多http请求，会降低页面性能
         }]
       }
       ...
+```
+
+### 2.4 css分离和图片路径处理
+```javascript
+安装插件：'npm install extract-text-webpack-plugin --save-dev'
+在webpack.dev.js文件中增加配置
+  const extractTextPlugin = require('extract-text-webpack-plugin')
+  ...
+  module: {
+    rules: [
+      // css loader
+      {
+        test:/\.css$/,
+        use: extractTextPlugin.extract({
+          fallback: "style-loader",
+          use: "css-loader"
+        }),
+        // test: /\.css$/,
+        // use: [
+        //   { loader: 'style-loader' },
+        //   { loader: 'css-loader' }
+        // ]
+      }
+      ....
+    ]
+  }
+  ...
+  plugins: [
+    ...
+    new extractTextPlugin("css/index.css")  //这里的/css/index.css 是分离后的路径
+  ],
+  ...
+  ⚠️是因为我们用的是webpack4.0.0以上版本,如果当前'extract-text-webpack-plugin'版本低于4.0，打包的之前要输入下面的安装命令升级这个包
+  'npm install --save-dev extract-text-webpack-plugin@next'
+```
+
+### 2.5 HTML中图片处理
+```javascript
+安装插件命令 'npm install html-withimg-loader --save-dev'
+  ...
+  module: {
+    rules: [
+      ...
+      //图片 loader
+      {
+        test:/\.(png|jpg|gif|jpeg)/,  //是匹配图片文件后缀名称
+        use:[{
+          loader:'url-loader', //是指定使用的loader和loader的配置参数
+          options:{
+            limit:5000,  //是把小于5000B的文件打成Base64的格式，写入JS
+            outputPath:'images/',  //打包后的图片放到images文件夹下
+          }
+        }]
+      },
+      // HTML中图片处理
+      {
+        test: /\.(htm|html)$/i,
+        use:[ 'html-withimg-loader'] 
+      }
+      ...
+    ]
+  }
+  ...
+```
+
+### 2.6 Less文件的打包和分离
+```javascript
+如果使用less 则需要安装下列包
+安装插件命令 'npm install --save-dev less'
+           'npm install --save-dev less-loader'
+  ...
+  module: {
+    rules: [
+      ...
+      //less loader
+      {
+        test: /\.less$/,
+        use: extractTextPlugin.extract({
+          use: [{
+              loader: "css-loader"
+          }, {
+              loader: "less-loader"
+          }],
+          // use style-loader in development
+          fallback: "style-loader"
+        })
+        // use: [{
+        //   loader: "style-loader" // creates style nodes from JS strings
+        // }, 
+        // {
+        //   loader: "css-loader" // translates CSS into CommonJS
+        // },
+        // {
+        //   loader: "less-loader" // compiles Less to CSS
+        // }]
+      },
+      
+      ...
+    ]
+  }
+  ...
+```
+
+### 2.7 SASS文件的打包和分离
+```javascript
+如果使用sass 则需要安装下列包
+安装插件命令 'npm install --save-dev sass'
+           'npm install --save-dev sass-loader'
+  ...
+  module: {
+    rules: [
+      ...
+      //sass loader
+      {
+        test: /\.scss$/,
+        use: extractTextPlugin.extract({
+          use: [{
+              loader: "css-loader"
+          }, {
+              loader: "sass-loader"
+          }],
+          // use style-loader in development
+          fallback: "style-loader"
+        })
+        // use: [{
+        //   loader: "style-loader" // creates style nodes from JS strings
+        // }, {
+        //   loader: "css-loader" // translates CSS into CommonJS
+        // }, {
+        //   loader: "sass-loader" // compiles Sass to CSS
+        // }]
+      },
+      ...
+    ]
+  }
+  ...
+```
+
+### 2.8 CSS3属性前缀
+```javascript
+'npm install --save-dev postcss-loader autoprefixer'
+
 ```

@@ -1,4 +1,7 @@
 body {
-  color: aqua;
-  background: url('../images/empty.png');
+  color: red;
+  background: url('../images/empty.png') no-repeat 0 0;
+}
+.className{
+  display: flex;
 }

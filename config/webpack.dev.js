@@ -1,6 +1,13 @@
 const path = require('path')
 const uglify = require('uglifyjs-webpack-plugin') // js压缩 
 const htmlPlugin = require('html-webpack-plugin') // html打包
+const extractTextPlugin = require('extract-text-webpack-plugin') // css分离和图片路径处理
+
+const website ={
+  publicPath:"http://localhost:8080/"
+  // publicPath:"http://192.168.1.1:8888/"
+}// 这里的IP和端口，是你本机的ip或者是你devServer配置的IP和端口。
+
 module.exports = {
   module: 'development',
   /**
@@ -21,62 +28,64 @@ module.exports = {
      * 1、单个入口 可直接写死 例如： build.js
      * 2、多个入口 须写成数组类型  例如： [name].js 输出的是按照原文件名
      *  */ 
-    filename: '[name].js'
+    filename: '[name].js',
+    publicPath: website.publicPath  //publicPath：主要作用就是处理静态文件路径的。
   },
   // 各个模块  例如css、js、image……
   module: {
     rules: [
       // css loader
       {
-        test: /\.css$/,
-        use: [
-          { loader: 'style-loader' },
-          { loader: 'css-loader' }
-        ]
+        test:/\.css$/,
+        use: extractTextPlugin.extract({
+          fallback: "style-loader",
+          use:[
+            { loader: "css-loader"}
+          ]
+        })
       },
+      //less loader
       {
-        test:/\.(png|jpg|gif|jpeg)/,  //是匹配图片文件后缀名称
+        test: /\.less$/,
+        use: extractTextPlugin.extract({
+          use: [{
+              loader: "css-loader" // translates CSS into CommonJS
+          }, {
+              loader: "less-loader" // compiles Less to CSS
+          }],
+          // use style-loader in development
+          fallback: "style-loader"
+        })
+      },
+      //sass loader
+      {
+        test: /\.scss$/,
+        use: extractTextPlugin.extract({
+          use: [{
+              loader: "css-loader"
+          }, {
+              loader: "sass-loader"
+          }],
+          // use style-loader in development
+          fallback: "style-loader"
+        })
+      },
+      // 是匹配图片文件后缀名称
+      {
+        test:/\.(png|jpg|gif|jpeg)/,
         use:[{
             loader:'url-loader', //是指定使用的loader和loader的配置参数
             options:{
-                limit:500  //是把小于500B的文件打成Base64的格式，写入JS
+              limit:5000, //是把小于5000B的文件打成Base64的格式，写入JS
+              outputPath:'images/' //打包后的图片放到images文件夹下
             }
         }]
+      },
+      // HTML中图片处理
+      {
+        test: /\.(htm|html)$/i,
+        use:[ 'html-withimg-loader'] 
       }
-      // {
-      //   test: /\.vue$/,
-      //   loader: 'vue-loader',
-      //   options: vueLoaderConfig
-      // },
-      // {
-      //   test: /\.js$/,
-      //   loader: 'babel-loader',
-      //   include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
-      // },
-      // {
-      //   test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-      //   loader: 'url-loader',
-      //   options: {
-      //     limit: 10000,
-      //     name: utils.assetsPath('img/[name].[hash:7].[ext]')
-      //   }
-      // },
-      // {
-      //   test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-      //   loader: 'url-loader',
-      //   options: {
-      //     limit: 10000,
-      //     name: utils.assetsPath('media/[name].[hash:7].[ext]')
-      //   }
-      // },
-      // {
-      //   test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-      //   loader: 'url-loader',
-      //   options: {
-      //     limit: 10000,
-      //     name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
-      //   }
-      // }
     ]
   },
   // 插件，用于生产模板和各项功能
@@ -88,7 +97,8 @@ module.exports = {
       },
       hash: true, //为了开发中js有缓存效果，所以加入hash，这样可以有效避免缓存JS。
       template: './src/index.html' //是要打包的html模版路径和文件名称。
-    })
+    }),
+    new extractTextPlugin("style/index.css")  //这里的/css/index.css 是分离后的路径
   ],
   // 配置webpack开发服务功能
   devServer: {
