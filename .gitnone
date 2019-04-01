@@ -1,7 +1,0 @@
-.DS_Store
-.vscode
-.idea
-
-dist/
-dist_temp/
-node_modules/
