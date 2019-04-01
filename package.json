@@ -5,10 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "webpack-dev-server --config=config/webpack.dev.js",
     "dev": "webpack  --mode development --config=config/webpack.dev.js",
     "build": "webpack  --mode production --config=config/webpack.dev.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "css-loader": "^2.1.1",
+    "style-loader": "^0.23.1"
+  }
 }
