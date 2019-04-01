@@ -138,7 +138,7 @@
   ...
 ```
 
-### 2.3 css图片处理打包
+### 2.3 css图片处理
 ```javascript
 安装图片引用路径插件 'npm install --save-dev file-loader url-loader'
 file-loader：解决引用路径的问题，拿background样式用url引入背景图来说，我们都知道，webpack最终会将各个模块打包成一个文件，
